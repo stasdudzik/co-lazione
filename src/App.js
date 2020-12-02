@@ -1,14 +1,22 @@
-import React, { Component } from "react";
+import React from "react";
 import "./App.css";
-import firebase from "./firebase.js";
+import firebase, { auth, provider } from "./firebase.js";
 
-class App extends Component {
+class App extends React.Component {
   state = {
-    currentItem: "",
+    newItem: "",
     username: "",
     items: [],
+    user: null,
   };
+
   componentDidMount() {
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        this.setState({ user });
+      }
+    });
+
     const itemsRef = firebase.database().ref("items");
     itemsRef.on("value", (snapshot) => {
       let items = snapshot.val();
@@ -33,16 +41,15 @@ class App extends Component {
   };
 
   handleSubmit = (event) => {
-    console.log("Calling handle Submit");
     event.preventDefault();
     const itemsRef = firebase.database().ref("items");
     const item = {
-      title: this.state.currentItem,
-      user: this.state.username,
+      title: this.state.newItem,
+      user: this.state.user.displayName || this.state.user.email,
     };
     itemsRef.push(item);
     this.setState({
-      currentItem: "",
+      newItem: "",
       username: "",
     });
   };
@@ -52,52 +59,95 @@ class App extends Component {
     itemRef.remove();
   }
 
+  logIn() {
+    console.log("Running login func");
+    auth.signInWithPopup(provider).then((result) => {
+      const user = result.user;
+      this.setState({
+        user,
+      });
+    });
+  }
+
+  logOut() {
+    auth.signOut().then(() => {
+      this.setState({
+        user: null,
+      });
+    });
+  }
+
   render() {
     return (
       <div className="app">
         <header>
           <div className="wrapper">
             <h1>COlazione</h1>
+            {this.state.user ? (
+              <button onClick={() => this.logOut()}>Log Out</button>
+            ) : (
+              <button onClick={() => this.logIn()}>Log In</button>
+            )}
           </div>
         </header>
-        <div className="container">
-          <section className="add-item">
-            <form onSubmit={this.handleSubmit}>
-              <input
-                type="text"
-                name="username"
-                placeholder="Jak masz na imię?"
-                value={this.state.username}
-                onChange={this.handleChange}
+        {this.state.user ? (
+          <div>
+            <div className="user-profile">
+              <img
+                src={this.state.user.photoURL}
+                alt={this.state.user.displayName || this.state.user.email}
               />
-              <input
-                type="text"
-                name="currentItem"
-                placeholder="Co przygotujesz?"
-                value={this.state.currentItem}
-                onChange={this.handleChange}
-              />
-              <button>Dodaj danie</button>
-            </form>
-          </section>
-          <section className="display-item">
-            <div className="wrapper">
-              <ul>
-                {this.state.items.map((item) => {
-                  return (
-                    <li key={item.id}>
-                      <h3>{item.title}</h3>
-                      <p>przygotuje {item.user}</p>
-                      <button onClick={() => this.removeItem(item.id)}>
-                        Usuń element
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
             </div>
-          </section>
-        </div>
+            <div className="container">
+              <section className="add-item">
+                <form onSubmit={this.handleSubmit}>
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="What's your name?"
+                    defaultValue={
+                      this.state.user.displayName || this.state.user.email
+                    }
+                  />
+                  <input
+                    type="text"
+                    name="newItem"
+                    placeholder="What are you bringing?"
+                    onChange={this.handleChange}
+                    value={this.state.newItem}
+                  />
+                  <button>Add Item</button>
+                </form>
+              </section>
+              <section className="display-item">
+                <div className="wrapper">
+                  <ul>
+                    {this.state.items.map((item) => {
+                      return (
+                        <li key={item.id}>
+                          <h3>{item.user}</h3>
+                          <p>
+                            {item.title}
+                            {item.user === this.state.user.displayName ||
+                            item.user === this.state.user.email ? (
+                              <button onClick={() => this.removeItem(item.id)}>
+                                Remove Item
+                              </button>
+                            ) : null}
+                          </p>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </section>
+            </div>
+          </div>
+        ) : (
+          <div className="wrapper">
+            <p>Log in to see the guest list and add your recipes!</p>
+          </div>
+        )}
       </div>
     );
   }
