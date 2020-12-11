@@ -5,6 +5,8 @@ import Login from "./components/Login";
 import Header from "./components/Header";
 import UserProfile from "./components/UserProfile";
 import ItemsView from "./components/ItemsView/ItemsView";
+import Form from "./components/Form";
+
 class App extends React.Component {
   state = {
     newItem: "",
@@ -96,26 +98,14 @@ class App extends React.Component {
             />
 
             <div className="container">
-              <section className="add-item">
-                <form onSubmit={this.handleSubmit}>
-                  <input
-                    type="text"
-                    name="username"
-                    placeholder="What's your name?"
-                    defaultValue={
-                      this.state.user.displayName || this.state.user.email
-                    }
-                  />
-                  <input
-                    type="text"
-                    name="newItem"
-                    placeholder="What are you bringing?"
-                    onChange={this.handleChange}
-                    value={this.state.newItem}
-                  />
-                  <button>Add Item</button>
-                </form>
-              </section>
+              <Form
+                handleSubmit={this.handleSubmit}
+                defaultValue={
+                  this.state.user.displayName || this.state.user.email
+                }
+                handleChange={this.handleChange}
+                valueItem={this.state.newItem}
+              />
               <ItemsView
                 items={this.state.items}
                 removeItemButton={this.removeItem}
