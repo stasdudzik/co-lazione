@@ -19,6 +19,7 @@ const ItemsView = ({ ...props }) => {
                     </button>
                   ) : null}
                 </p>
+                <button onClick={props.openModalFn}></button>
               </li>
             );
           })}

@@ -6,6 +6,7 @@ import Header from "./components/Header";
 import UserProfile from "./components/UserProfile";
 import ItemsView from "./components/ItemsView/ItemsView";
 import Form from "./components/Form";
+import Modal from "./components/ItemsView/Modal";
 
 class App extends React.Component {
   state = {
@@ -82,6 +83,14 @@ class App extends React.Component {
     });
   }
 
+  openModal = () => {
+    this.setState({ isModalOpen: true });
+  };
+
+  closeModal = () => {
+    this.setState({ isModalOpen: false });
+  };
+
   render() {
     return (
       <div className="app">
@@ -111,12 +120,14 @@ class App extends React.Component {
                 removeItemButton={this.removeItem}
                 displayName={this.state.user.displayName}
                 email={this.state.user.email}
+                openModalFn={this.openModal}
               />
             </div>
           </>
         ) : (
           <Login onClick={() => this.logIn()} />
         )}
+        {this.state.isModalOpen && <Modal closeModalFn={this.closeModal} />}
       </div>
     );
   }
