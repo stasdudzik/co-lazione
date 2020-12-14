@@ -12,6 +12,10 @@ this app allows users to login to the party view and declare what they're bringi
 
 - app uses firebase for storage
 
-todolist requires:
+co-lazione also requires:
+
+### [i18n](https://github.com/mashpie/i18n-node) for translation
+
+### [react-share](https://github.com/nygardk/react-share) for SM sharing
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
